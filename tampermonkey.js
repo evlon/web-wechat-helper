@@ -69,7 +69,7 @@
                                 });
 
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
-                                    if (noSendUserName[d.UserName]) {
+                                    if (!noSendUserName[d.UserName]) {
 
                                         if (d.isBrandContact() == 0 && d.isContact()) {
                                             console.log(d, d.isContact(), d.isShieldUser(), d.isSpContact(), d.isNewsApp(), d.isReadOnlyContact(), d.isBrandContact());
@@ -116,7 +116,7 @@
                                 }
 
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
-                                    if (noSendUserName[d.UserName]) {
+                                    if (!noSendUserName[d.UserName]) {
 
                                         sendToOthers(msg, d);
                                     }
