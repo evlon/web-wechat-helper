@@ -40,13 +40,12 @@
                                     a.Scene = 2,
                                     a = chatFactory.createMessage(a),
                                     a.sendByLocal = !1,
-                                    a.Content = utilFactory.htmlDecode(a.Content.replace(/^@\w+:<br\/>/, "")),
+                                    a.Content = utilFactory.htmlDecode(a.Content.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
                                     a.MMActualSender = accountFactory.getUserName(),
-                                    a.MMSendContent && (a.MMSendContent = a.MMSendContent.replace(/^@\w+:\s/, "")),
-                                    a.MMDigest && (a.MMDigest = a.MMDigest.replace(/^@\w+:/, "")),
-                                    a.MMActualContent && (a.MMActualContent = utilFactory.clearHtmlStr(a.MMActualContent.replace(/^@\w+:<br\/>/, ""))),
+                                    a.MMSendContent && (a.MMSendContent = a.MMSendContent.replace(/^@\w+:\s/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
+                                    a.MMDigest && (a.MMDigest = a.MMDigest.replace(/^@\w+:/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
+                                    a.MMActualContent && (a.MMActualContent = utilFactory.clearHtmlStr(a.MMActualContent.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())));
 
-                                    a.Content = a.Content.replace(/\[某某\]/g, targetUser.getDisplayName())
 
                                 chatFactory.appendMessage(a),
                                     chatFactory.sendMessage(a)
