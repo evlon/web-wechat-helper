@@ -14,6 +14,10 @@
 (function() {
     'use strict';
 
+    function getDelay(){
+        return  Math.random(2000) * 1000 + 3000
+    }
+
 
     function initHelper(){
         var $chatSenderScope = $('div[ng-controller="chatSenderController"]').scope();
@@ -66,7 +70,7 @@
                                         });
                                     }
                                 });
-
+                                var queFun = [];
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                     if (!noSendUserName[d.UserName]) {
 
@@ -78,16 +82,29 @@
                                             });
                                             e.ToUserName = d.UserName;
                                             // '@1ea16a5e05e2e9f1737bb05a69d54e45';
-                                            chatFactory.appendMessage(e);
-                                            chatFactory.sendMessage(e);
-                                            ngDialog[d.UserName] = "";
+                                            queFun.push(function(){
+                                                chatFactory.appendMessage(e);
+                                                chatFactory.sendMessage(e);
+                                                ngDialog[d.UserName] = "";
+                                            });
                                         }
                                     }
 
                                 })
+                                queFun.push(function(){
+                                    ngDialog[chatFactory.getCurrentUserName()] = "";
+                                    $chatSenderScope.editAreaCtn = "";
+                                });
 
-                                ngDialog[chatFactory.getCurrentUserName()] = "",
-                                    $chatSenderScope.editAreaCtn = ""
+                                function sendMsgTask(){
+                                    var obj = queFun.shift();
+                                    if(obj){
+                                        obj();
+                                        setTimeout(sendMsgTask,getDelay());
+                                    }
+
+                                }
+                                sendMsgTask();
                             }
                         }
 
@@ -105,7 +122,7 @@
                                 //                         });
                                 var allContacts = _contactFactory.getAllContacts();
                                 for (var userName in allContacts) {
-                                    if (allContacts[userName].NickName == '#不群发#') {
+                                    if (allContacts[userName].NickName ==  '#不群发#') {
                                         console.log(allContacts[userName]);
 
                                         allContacts[userName].MemberList.forEach(function(dd, ii) {
@@ -113,14 +130,23 @@
                                         });
                                     }
                                 }
-
+                                var queueSend = [];
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                     if (!noSendUserName[d.UserName]) {
-
-                                        sendToOthers(msg, d);
+                                        queueSend.push({msg:msg, target:d});
                                     }
 
                                 });
+
+                                function sendMsgTask(){
+                                    var obj = queueSend.shift();
+                                    if(obj){
+                                        sendToOthers(obj.msg, obj.target);
+                                        setTimeout(sendMsgTask,getDelay());
+                                    }
+
+                                }
+                                sendMsgTask();
                             }
 
                         }

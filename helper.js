@@ -1,3 +1,7 @@
+function getDelay(){
+    return  Math.random(2000) * 1000 + 3000
+}
+
 
 function initHelper(){
     var $chatSenderScope = $('div[ng-controller="chatSenderController"]').scope();
@@ -15,23 +19,24 @@ function initHelper(){
                         if (msg.MsgType != confFactory.MSGTYPE_SYS) {
                             var a = angular.copy(msg);
                             a.ToUserName = targetUser.UserName,
-                            a.FromUserName = accountFactory.getUserName(),
-                            a.isTranspond = !0,
-                            a.MsgIdBeforeTranspond = msg.MsgIdBeforeTranspond || msg.MsgId,
-                            a._h = void 0,
-                            a._offsetTop = void 0,
-                            a.MMSourceMsgId = msg.MsgId,
-                            a.Scene = 2,
-                            a = chatFactory.createMessage(a),
-                            a.sendByLocal = !1,
-                            a.Content = utilFactory.htmlDecode(a.Content.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
-                            a.MMActualSender = accountFactory.getUserName(),
-                            a.MMSendContent && (a.MMSendContent = a.MMSendContent.replace(/^@\w+:\s/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
-                            a.MMDigest && (a.MMDigest = a.MMDigest.replace(/^@\w+:/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
-                            a.MMActualContent && (a.MMActualContent = utilFactory.clearHtmlStr(a.MMActualContent.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())));
+                                a.FromUserName = accountFactory.getUserName(),
+                                a.isTranspond = !0,
+                                a.MsgIdBeforeTranspond = msg.MsgIdBeforeTranspond || msg.MsgId,
+                                a._h = void 0,
+                                a._offsetTop = void 0,
+                                a.MMSourceMsgId = msg.MsgId,
+                                a.Scene = 2,
+                                a = chatFactory.createMessage(a),
+                                a.sendByLocal = !1,
+                                a.Content = utilFactory.htmlDecode(a.Content.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
+                                a.MMActualSender = accountFactory.getUserName(),
+                                a.MMSendContent && (a.MMSendContent = a.MMSendContent.replace(/^@\w+:\s/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
+                                a.MMDigest && (a.MMDigest = a.MMDigest.replace(/^@\w+:/, "").replace(/\[某某\]/g, targetUser.getDisplayName())),
+                                a.MMActualContent && (a.MMActualContent = utilFactory.clearHtmlStr(a.MMActualContent.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())));
+
 
                             chatFactory.appendMessage(a),
-                            chatFactory.sendMessage(a)
+                                chatFactory.sendMessage(a)
                         }
                     }
 
@@ -39,7 +44,7 @@ function initHelper(){
                         _contactFactory;
 
                         if (mmpop.close(),
-                        !$chatSenderScope.editAreaCtn.replace(/<br\/?>/g, "").match(/^\s*$/)) {
+                            !$chatSenderScope.editAreaCtn.replace(/<br\/?>/g, "").match(/^\s*$/)) {
 
                             var noSendUserName = {};
                             var nosendrooms = _contactFactory.getAllChatroomContact().forEach(function(d, i) {
@@ -49,7 +54,7 @@ function initHelper(){
                                     });
                                 }
                             });
-
+                            var queFun = [];
                             _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                 if (!noSendUserName[d.UserName]) {
 
@@ -61,16 +66,29 @@ function initHelper(){
                                         });
                                         e.ToUserName = d.UserName;
                                         // '@1ea16a5e05e2e9f1737bb05a69d54e45';
-                                        chatFactory.appendMessage(e);
-                                        chatFactory.sendMessage(e);
-                                        ngDialog[d.UserName] = "";
+                                        queFun.push(function(){
+                                            chatFactory.appendMessage(e);
+                                            chatFactory.sendMessage(e);
+                                            ngDialog[d.UserName] = "";
+                                        });
                                     }
                                 }
 
                             })
+                            queFun.push(function(){
+                                ngDialog[chatFactory.getCurrentUserName()] = "";
+                                $chatSenderScope.editAreaCtn = "";
+                            });
 
-                            ngDialog[chatFactory.getCurrentUserName()] = "",
-                            $chatSenderScope.editAreaCtn = ""
+                            function sendMsgTask(){
+                                var obj = queFun.shift();
+                                if(obj){
+                                    obj();
+                                    setTimeout(sendMsgTask,getDelay());
+                                }
+
+                            }
+                            sendMsgTask();
                         }
                     }
 
@@ -79,16 +97,16 @@ function initHelper(){
                         if ($chatSenderScope.chatContent.length > 0) {
                             var msg = $chatSenderScope.chatContent[$chatSenderScope.chatContent.length - 1];
                             var noSendUserName = {};
-    //                         var nosendrooms = _contactFactory.getAllChatroomContact().forEach(function(d, i) {
-    //                             if (d.NickName == '#不群发#') {
-    //                                 d.MemberList.forEach(function(dd, ii) {
-    //                                     noSendUserName[dd.UserName] = true;
-    //                                 });
-    //                             }
-    //                         });
+                            //                         var nosendrooms = _contactFactory.getAllChatroomContact().forEach(function(d, i) {
+                            //                             if (d.NickName == '#不群发#') {
+                            //                                 d.MemberList.forEach(function(dd, ii) {
+                            //                                     noSendUserName[dd.UserName] = true;
+                            //                                 });
+                            //                             }
+                            //                         });
                             var allContacts = _contactFactory.getAllContacts();
                             for (var userName in allContacts) {
-                                if (allContacts[userName].NickName == '#不群发#') {
+                                if (allContacts[userName].NickName ==  '#不群发#') {
                                     console.log(allContacts[userName]);
 
                                     allContacts[userName].MemberList.forEach(function(dd, ii) {
@@ -96,14 +114,23 @@ function initHelper(){
                                     });
                                 }
                             }
-
+                            var queueSend = [];
                             _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                 if (!noSendUserName[d.UserName]) {
-
-                                    sendToOthers(msg, d);
+                                    queueSend.push({msg:msg, target:d});
                                 }
 
                             });
+
+                            function sendMsgTask(){
+                                var obj = queueSend.shift();
+                                if(obj){
+                                    sendToOthers(obj.msg, obj.target);
+                                    setTimeout(sendMsgTask,getDelay());
+                                }
+
+                            }
+                            sendMsgTask();
                         }
 
                     }
@@ -114,7 +141,7 @@ function initHelper(){
                     $('div[ng-controller="chatSenderController"] div.action').append(btnSendAll);
                     $('div[ng-controller="chatSenderController"] div.action').append(btnReSendAll);
                 }
-                ]);
+                                                                                 ]);
             } else {
                 btnSendAll.show();
             }
@@ -126,13 +153,13 @@ function initHelper(){
     return $chatSenderScope;
 }
 
- function reInitHelper() {
+function reInitHelper() {
     setTimeout(function(){
         var $chatSenderScopeNew = $('div[ng-controller="chatSenderController"]').scope();
-        if($chatSenderScopeNew  && $chatSenderScope != $chatSenderScopeNew){   
+        if($chatSenderScopeNew  && $chatSenderScope != $chatSenderScopeNew){
 
             $chatSenderScope = initHelper();
-            
+
             $chatSenderScope.$on("$destroy",reInitHelper);
 
         }
@@ -141,8 +168,7 @@ function initHelper(){
         }
 
     },500);
- }
+}
 var $chatSenderScope = null;
 
 reInitHelper();
-
