@@ -15,7 +15,35 @@
     'use strict';
 
     function getDelay(){
-        return  Math.random(2000) * 1000 + 3000
+        return  Math.random(2000) * 1000 + 1000
+    }
+
+    function getNonSendContactNames(contactFactory){
+        var noSendUserName = {};
+//         var nosendrooms = contactFactory.getAllChatroomContact().forEach(function(d, i) {
+//             if (d.NickName == '#不群发#') {
+//                 d.MemberList.forEach(function(dd, ii) {
+//                     noSendUserName[dd.UserName] = true;
+//                 });
+//             }
+//         });
+
+        var allContacts = _contactFactory.getAllContacts();
+        for (var userName in allContacts) {
+            if (allContacts[userName].NickName ==  '#不群发#') {
+                console.log(allContacts[userName]);
+
+                allContacts[userName].MemberList.forEach(function(dd, ii) {
+                    noSendUserName[dd.UserName] = true;
+                });
+            }
+        }
+
+        contactFactory.getAllBrandContact().forEach(function(d, i) {
+                    noSendUserName[d.UserName] = true;
+        });
+
+        return noSendUserName;
     }
 
 
@@ -62,14 +90,7 @@
                             if (mmpop.close(),
                                 !$chatSenderScope.editAreaCtn.replace(/<br\/?>/g, "").match(/^\s*$/)) {
 
-                                var noSendUserName = {};
-                                var nosendrooms = _contactFactory.getAllChatroomContact().forEach(function(d, i) {
-                                    if (d.NickName == '#不群发#') {
-                                        d.MemberList.forEach(function(dd, ii) {
-                                            noSendUserName[dd.UserName] = true;
-                                        });
-                                    }
-                                });
+                                var noSendUserName = getNonSendContactNames(_contactFactory);
                                 var queFun = [];
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                     if (!noSendUserName[d.UserName]) {
@@ -112,24 +133,8 @@
                         $chatSenderScope.reSendAllTextMessage = function() {
                             if ($chatSenderScope.chatContent.length > 0) {
                                 var msg = $chatSenderScope.chatContent[$chatSenderScope.chatContent.length - 1];
-                                var noSendUserName = {};
-                                //                         var nosendrooms = _contactFactory.getAllChatroomContact().forEach(function(d, i) {
-                                //                             if (d.NickName == '#不群发#') {
-                                //                                 d.MemberList.forEach(function(dd, ii) {
-                                //                                     noSendUserName[dd.UserName] = true;
-                                //                                 });
-                                //                             }
-                                //                         });
-                                var allContacts = _contactFactory.getAllContacts();
-                                for (var userName in allContacts) {
-                                    if (allContacts[userName].NickName ==  '#不群发#') {
-                                        console.log(allContacts[userName]);
+                                var noSendUserName = getNonSendContactNames(_contactFactory);
 
-                                        allContacts[userName].MemberList.forEach(function(dd, ii) {
-                                            noSendUserName[dd.UserName] = true;
-                                        });
-                                    }
-                                }
                                 var queueSend = [];
                                 _contactFactory.getAllFriendContact().forEach(function(d, i) {
                                     if (!noSendUserName[d.UserName]) {
