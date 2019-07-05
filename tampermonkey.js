@@ -48,14 +48,14 @@ function initHelper(){
         if (currentUser == 'filehelper') {
             console.log('found filehelper');
             if (btnSendAll.length == 0) {
-                $('div[ng-controller="chatSenderController"]').injector().invoke(["$rootScope", "$compile", "ngDialog", "confFactory", "accountFactory", "contactFactory", "chatFactory", "mmpop", "utilFactory", function($rootScope, $compile, ngDialog, confFactory, accountFactory, contactFactory, chatFactory, mmpop, utilFactory) {
+                $('div[ng-controller="chatSenderController"]').injector().invoke(["$rootScope", "$compile", "ngDialog", "confFactory", "accountFactory", "contactFactory", "chatFactory",'chatroomFactory', "mmpop", "utilFactory", function($rootScope, $compile, ngDialog, confFactory, accountFactory, contactFactory, chatFactory, chatroomFactory, mmpop, utilFactory) {
                     var _accountFactory = accountFactory;
                     var _contactFactory = contactFactory;
                     window._contactFactory = contactFactory;
                     window._accountFactory = accountFactory;
                     window._ngDialog = ngDialog;
                     window._chatFactory = chatFactory;
-
+                    window._chatroomFactory = chatroomFactory;
 
                     $chatSenderScope.workingStatus = {
                         work:'none',
@@ -95,11 +95,12 @@ function initHelper(){
                                 a.MMActualContent && (a.MMActualContent = utilFactory.clearHtmlStr(a.MMActualContent.replace(/^@\w+:<br\/>/, "").replace(/\[某某\]/g, targetUser.getDisplayName())));
 
                             if($debug_only){
-                                appendLogger('发送：' + targetUser.getDisplayName())
+                                appendLogger('发送：' + targetUser.getDisplayName());
                             }
                             else{
                                 chatFactory.appendMessage(a);
                                 chatFactory.sendMessage(a);
+                                appendLogger('发送：' + targetUser.getDisplayName());
                             }
                         }
                     }
@@ -157,6 +158,7 @@ function initHelper(){
                                         queFun.push(function(){
                                             chatFactory.appendMessage(e);
                                             chatFactory.sendMessage(e);
+                                            ppendLogger('发送：' + d.getDisplayName())
 
                                             ngDialog[d.UserName] = "";
                                         });
