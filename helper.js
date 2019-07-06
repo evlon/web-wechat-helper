@@ -154,7 +154,7 @@ function initHelper() {
                             contacts = _contactFactory.getAllFriendContact();
                         }
 
-                        if($chatSenderScope.$setting.sendToUser){
+                        if($chatSenderScope.$setting.sendToChatroom){
                             contacts = contacts.concat(_contactFactory.getAllChatroomContact());
                         }
 
@@ -267,7 +267,7 @@ function initHelper() {
                             contacts = _contactFactory.getAllFriendContact();
                         }
 
-                        if($chatSenderScope.$setting.sendToUser){
+                        if($chatSenderScope.$setting.sendToChatroom){
                             contacts = contacts.concat(_contactFactory.getAllChatroomContact());
                         }
 
