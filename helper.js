@@ -6,8 +6,8 @@ function loadSetting() {
         sendToChatroom: true,
         sendToUser: true,
         mode: 0,//0：仅发送， 1：排除发送
-        except: [],
-        only: [],
+        except: '',
+        only: '',
         interval: 3
     };
 }
