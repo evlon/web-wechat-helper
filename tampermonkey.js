@@ -15,25 +15,25 @@
 
 
 
-// function getNonSendContactNames(contactFactory){
-//     var noSendUserName = {};
-//     var allContacts = _contactFactory.getAllContacts();
-//     for (var userName in allContacts) {
-//         if (allContacts[userName].NickName ==  '#不群发#') {
-//             console.log(allContacts[userName]);
+function getNonSendContactNames(contactFactory, exceptChatroom){
+    var noSendUserName = {};
+    var allContacts = _contactFactory.getAllContacts();
+    for (var userName in allContacts) {
+        if (allContacts[userName].NickName ==  exceptChatroom) {
+            console.log(allContacts[userName]);
 
-//             allContacts[userName].MemberList.forEach(function(dd, ii) {
-//                 noSendUserName[dd.UserName] = true;
-//             });
-//         }
-//     }
+            allContacts[userName].MemberList.forEach(function(dd, ii) {
+                noSendUserName[dd.UserName] = true;
+            });
+        }
+    }
 
-//     contactFactory.getAllBrandContact().forEach(function(d, i) {
-//         noSendUserName[d.UserName] = true;
-//     });
+    contactFactory.getAllBrandContact().forEach(function(d, i) {
+        noSendUserName[d.UserName] = true;
+    });
 
-//     return noSendUserName;
-// }
+    return noSendUserName;
+}
 
 function loadSetting() {
     return JSON.parse(localStorage.getItem('-=#setting#=-')) || {
@@ -43,6 +43,7 @@ function loadSetting() {
         sendToUser: true,
         mode: 0,//0：仅发送， 1：排除发送
         except: '',
+        exceptChatroom: '#不群发#',
         only: '',
         interval: 3
     };
@@ -147,6 +148,17 @@ function initHelper() {
                             }
                             return function (contact) {
                                 return !brandContact[contact.UserName] && !cache[contact.getDisplayName()];
+                            }
+                        }
+                        else if (setting.mode == 2) { //排除群成员
+                            var cache = {};
+                            var except = setting.except.split(',');
+                            for (var i = 0, c = except.length; i < c; i++) {
+                                cache[except[i]] = true;
+                            }
+                            var cache = getNonSendContactNames(contactFactory,setting.exceptChatroom);
+                            return function (contact) {
+                                return !brandContact[contact.UserName] && !cache[contact.UserName];
                             }
                         }
                         else {
@@ -397,13 +409,16 @@ function initHelper() {
                     </div>
                     <div>
                     <div>
-                    <input type="radio" ng-model="$setting.mode" value="0">指定名称发送：<input type="text"  ng-model="$setting.only"></span>
-                    <span><input type="radio" ng-model="$setting.mode" value="1">排除名称发送:<input type="text"  ng-model="$setting.except"></span>
+                    <span><input type="radio" ng-model="$setting.mode" value="0">指定名称发送：<input type="text"  ng-model="$setting.only"></span><br/>
+                    <span><input type="radio" ng-model="$setting.mode" value="1">排除名称发送：<input type="text"  ng-model="$setting.except"></span><br/>
+                    <span><input type="radio" ng-model="$setting.mode" value="2">排除群中成员：<input type="text"  ng-model="$setting.exceptChatroom"></span> 
                     </div>
                     <div>发送间隔:<input type="text" style="width:10px"  ng-model="$setting.interval">秒</div>
 
                     </div>`)($chatSenderScope);
                     $('div[ng-controller="chatSenderController"] div.action').parent().append(uiSetting);
+
+                    $chatSenderScope.switchSettingUI();
 
                 }
                 ]);
